@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Config por defecto de la librería: Boot la toma si el consumidor no trae su propio logback-spring.xml. -->
+<configuration>
+    <include resource="com/expense/tracker/logger/logback-base.xml"/>
+</configuration>

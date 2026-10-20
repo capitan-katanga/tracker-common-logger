@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Base de logging del expense tracker: consola de Boot + appender de OpenTelemetry (logs a Loki por OTLP).
+    Un consumidor que necesite su propio logback-spring.xml incluye este fragmento:
+        <configuration>
+            <include resource="com/expense/tracker/logger/logback-base.xml"/>
+            ... sus loggers/appenders ...
+        </configuration>
+-->
+<included>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <!-- Lo conecta con el SDK de OTel OpenTelemetryAppenderInstaller (autoconfiguración de la librería).
+         captureMdcAttributes: traceId/spanId/correlationId/userId viajan como atributos del log.
+         captureKeyValuePairAttributes: http.method/http.status/duration_ms de las líneas HTTP también. -->
+    <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
+        <captureMdcAttributes>*</captureMdcAttributes>
+        <captureKeyValuePairAttributes>true</captureKeyValuePairAttributes>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="OTEL"/>
+    </root>
+</included>
