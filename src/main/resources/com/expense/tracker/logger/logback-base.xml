@@ -8,14 +8,22 @@
         </configuration>
 -->
 <included>
+    <!-- Pattern de consola de Boot sin PID, app name ni hilo, y con el nombre simple del logger, para acortar
+         el prefijo: el servicio viaja a Loki como service.name, el hilo como thread.name (ver el appender
+         OTEL) y el logger completo como scope. Va antes del include porque defaults.xml de Boot respeta un
+         CONSOLE_LOG_PATTERN ya definido; logging.pattern.console lo pisa. -->
+    <property name="CONSOLE_LOG_PATTERN" value="${CONSOLE_LOG_PATTERN:-%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd'T'HH:mm:ss.SSSXXX}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}){} %clr(--- ${LOG_CORRELATION_PATTERN:-}){faint}%clr(%logger{0}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
 
     <!-- Lo conecta con el SDK de OTel OpenTelemetryAppenderInstaller (autoconfiguración de la librería).
          captureMdcAttributes: traceId/spanId/correlationId/userId viajan como atributos del log.
-         captureKeyValuePairAttributes: http.method/http.status/duration_ms de las líneas HTTP también. -->
+         captureKeyValuePairAttributes: http.method/http.status/duration_ms de las líneas HTTP también.
+         captureExperimentalAttributes: thread.name/thread.id, que la consola no muestra. -->
     <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
         <captureMdcAttributes>*</captureMdcAttributes>
         <captureKeyValuePairAttributes>true</captureKeyValuePairAttributes>
+        <captureExperimentalAttributes>true</captureExperimentalAttributes>
     </appender>
 
     <root level="INFO">

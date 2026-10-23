@@ -21,8 +21,11 @@ Mimir) y loguea la entrada y salida HTTP con un `correlationId` de punta a punta
     tracing.sampling.probability: 1.0   # pisalo en producción
   logging.pattern.correlation: "[%X{traceId:-},%X{spanId:-}] [%X{correlationId:-}] [%X{userId:-}] "
   ```
-- **`logback-spring.xml` base**: consola de Boot + appender `OTEL` (logs a Loki por OTLP, con el MDC y los
-  key-values como atributos). El servicio no necesita su propio `logback-spring.xml`.
+- **`logback-spring.xml` base**: consola + appender `OTEL` (logs a Loki por OTLP, con el MDC, los
+  key-values y `thread.name`/`thread.id` como atributos). El servicio no necesita su propio `logback-spring.xml`.
+  La consola usa el pattern de Boot sin PID, app name ni hilo y con el nombre simple de la clase como logger,
+  para acortar el prefijo (en Loki el servicio es `service.name`, el hilo `thread.name` y el logger va
+  completo como scope); `logging.pattern.console` lo pisa.
 - **Logueo de entrada** (`HttpLoggingFilter`, servlet): correlación + líneas `REQUEST`/`RESPONSE`.
 - **Logueo de salida** (`LoggingClientInterceptor`): se engancha solo a todo `RestClient.Builder` de Boot
   (incluidos los HTTP service groups `@HttpExchange`).

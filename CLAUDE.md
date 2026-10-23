@@ -48,7 +48,11 @@ JaCoCo exige 90% instrucciones / 80% ramas **por paquete y sin exclusiones**: to
 - `util/LogMasking` (headers, `maskBody` regex sin Jackson, `sanitize` CR/LF) y `util/LogBodies` (qué
   content-types se loguean, truncado).
 - Logback: `logback-spring.xml` raíz → incluye `com/expense/tracker/logger/logback-base.xml` (Boot
-  `base.xml` + appender `OTEL` con `captureMdcAttributes=*` y `captureKeyValuePairAttributes=true`).
+  `base.xml` + appender `OTEL` con `captureMdcAttributes=*`, `captureKeyValuePairAttributes=true` y
+  `captureExperimentalAttributes=true`, que agrega `thread.name`/`thread.id`). Antes del include define
+  `CONSOLE_LOG_PATTERN` (el default de Boot sin PID, app name ni hilo, y logger `%logger{0}`) con `${CONSOLE_LOG_PATTERN:-...}`: el
+  `defaults.xml` de Boot respeta una property ya definida y `logging.pattern.console` sigue ganando.
+  `LogbackBaseConfigTest` lo cubre con un `LoggerContext` propio.
   Las líneas HTTP usan la fluent API de SLF4J (`addKeyValue`) para que los atributos lleguen a Loki.
 
 ## Convenciones
